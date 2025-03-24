@@ -1,0 +1,4 @@
+cd server
+make clean - clears precious server builds
+make - compile server
+./library_server

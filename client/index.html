@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Library Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="login">
+        <h2>Login</h2>
+        <form id="loginForm">
+            <label for="username">Username:</label>
+            <input type="text" id="username" name="username" required>
+            <br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+            <br>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <div id="content" style="display:none;">
+        <h2>Library Catalog</h2>
+        <input type="text" id="search" placeholder="Search for books...">
+        <div id="catalog">
+            <!-- Catalog content will be loaded here -->
+        </div>
+    </div>
+
+    <script src="main.js"></script>
+</body>
+</html>
