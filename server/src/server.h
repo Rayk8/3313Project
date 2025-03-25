@@ -1,6 +1,8 @@
 #ifndef SERVER_H
 #define SERVER_H
 
+#include "library.h"
+
 class Server {
 public:
     Server(int port);
@@ -8,7 +10,7 @@ public:
     void start();
 private:
     int port;
-    // Additional members (like socket file descriptor) can be added here.
+    Library library;
 };
 
 #endif // SERVER_H

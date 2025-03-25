@@ -1,0 +1,19 @@
+{
+    "B001": {
+      "title": "The C++ Programming Language",
+      "available": false
+    },
+    "B002": {
+      "title": "Clean Code",
+      "available": true
+    },
+    "B003": {
+      "title": "Introduction to Algorithms",
+      "available": false
+    },
+    "B004": {
+      "title": "Design Patterns",
+      "available": true
+    }
+  }
+  

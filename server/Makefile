@@ -1,7 +1,7 @@
 CXX = g++
-CXXFLAGS = -std=c++11 -Wall -pthread
+CXXFLAGS = -std=c++17 -Wall -pthread -Iinclude
 
-SRC = src/main.cpp src/server.cpp
+SRC = src/main.cpp src/server.cpp src/library.cpp src/auth.cpp
 OBJ = $(SRC:.cpp=.o)
 TARGET = library_server
 

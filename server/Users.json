@@ -1,0 +1,13 @@
+{
+    "alice": {
+        "checkedOutBooks": [
+            "B001",
+            "B003"
+        ],
+        "password": "alice123"
+    },
+    "raykang": {
+        "checkedOutBooks": [],
+        "password": "12345"
+    }
+}
