@@ -40,7 +40,9 @@ void handleClient(int client_socket, Library* library) {
             size_t endPass = request.find(" ", posPass);
             std::string password = request.substr(posPass + 9, endPass - (posPass + 9));
             if (loginUser(username, password)) {
-                response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nLogin Successful";
+                // response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nLogin Successful";
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nLogin Successful";
+
             } else {
                 response = "HTTP/1.1 401 Unauthorized\r\nContent-Type: text/html\r\n\r\nLogin Failed";
             }
@@ -57,7 +59,8 @@ void handleClient(int client_socket, Library* library) {
             size_t endPass = request.find(" ", posPass);
             std::string password = request.substr(posPass + 9, endPass - (posPass + 9));
             if (registerUser(username, password)) {
-                response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nRegistration Successful";
+                // response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nRegistration Successful";
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nLogin Successful";
             } else {
                 response = "HTTP/1.1 409 Conflict\r\nContent-Type: text/html\r\n\r\nUser Already Exists";
             }

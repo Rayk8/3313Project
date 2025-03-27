@@ -1,4 +1,8 @@
 {
+    "Michelle": {
+        "checkedOutBooks": [],
+        "password": "123"
+    },
     "alice": {
         "checkedOutBooks": [
             "B001",
