@@ -26,7 +26,8 @@ void handleClient(int client_socket, Library* library) {
         if (pos != std::string::npos) {
             size_t end = request.find(" ", pos);
             std::string query = request.substr(pos + 6, end - (pos + 6));
-            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + library->searchBooks(query);
+            // response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + library->searchBooks(query);
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + library->searchBooks(query);
         } else {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nMissing query parameter";
         }
@@ -59,8 +60,8 @@ void handleClient(int client_socket, Library* library) {
             size_t endPass = request.find(" ", posPass);
             std::string password = request.substr(posPass + 9, endPass - (posPass + 9));
             if (registerUser(username, password)) {
-                // response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nRegistration Successful";
-                response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nLogin Successful";
+                response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nRegistration Successful";
+                // response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nLogin Successful";
             } else {
                 response = "HTTP/1.1 409 Conflict\r\nContent-Type: text/html\r\n\r\nUser Already Exists";
             }
@@ -68,6 +69,19 @@ void handleClient(int client_socket, Library* library) {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nMissing registration parameters";
         }
     }
+    else if (request.find("GET /currentBooks") != std::string::npos) {
+        size_t posUser = request.find("username=");
+        if (posUser != std::string::npos) {
+            size_t end = request.find(" ", posUser);
+            std::string username = request.substr(posUser + 9, end - (posUser + 9));
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" 
+                    + library->getCurrentBooks(username);
+        } else {
+            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
+        }
+    }
+
+
     else {
         response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nInvalid Endpoint";
     }

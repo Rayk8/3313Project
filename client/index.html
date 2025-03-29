@@ -30,14 +30,26 @@
         <div id="loginResult"></div>
       </div>
     </section>
-    <section id="home-section" style="display:none;">
+    <section id="navbar-section" style="display: none;">
+      <nav>
+        <ul class="navbar">
+          <li><a href="#" id="navHome">Home</a></li>
+          <li><a href="#" id="navCurrentBooks">Current Books</a></li>
+        </ul>
+      </nav>
+    </section>  
+    <section id="home-section" style="display:none;">     
       <h2>Welcome, <span id="userDisplay"></span>!</h2>
       <div id="search-box">
         <input type="text" id="searchQuery" placeholder="Search for books...">
         <button id="searchButton">Search</button>
       </div>
-      <div id="searchResults"></div>
+      <div id="searchResults"></div>   
     </section>
+    <section id="current-books-section" style="display: none;">
+      <h2>Your Checked Out Books</h2>
+      <ul id="checkedOutList"></ul>
+    </section>  
   </div>
   <script src="main.js"></script>
 </body>

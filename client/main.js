@@ -26,8 +26,11 @@ document.getElementById("registerForm").addEventListener("submit", function(even
         document.getElementById("loginResult").innerHTML = data;
         if (data.includes("Login Successful")) {
           // Hide the authentication section and show the home (search) section.
+          localStorage.setItem('username', username);  // Store for current-books.html
           document.getElementById("auth-section").style.display = "none";
+          document.getElementById('navbar-section').style.display = 'block';
           document.getElementById("home-section").style.display = "block";
+          document.getElementById('current-books-section').style.display = 'none';
           document.getElementById("userDisplay").textContent = username;
         }
       })
@@ -48,4 +51,24 @@ document.getElementById("registerForm").addEventListener("submit", function(even
         console.error("Search error:", error);
       });
   });
+
+  // Navbar navigation
+  document.getElementById('navHome').addEventListener('click', (e) => {
+    e.preventDefault();
+    document.getElementById('home-section').style.display = 'block';
+    document.getElementById('current-books-section').style.display = 'none';
+  });
+
+  document.getElementById('navCurrentBooks').addEventListener('click', (e) => {
+    e.preventDefault();
+    const username = localStorage.getItem('username');
+    fetch(`http://localhost:8080/currentBooks?username=${username}`)
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById('checkedOutList').innerHTML = html;
+        document.getElementById('home-section').style.display = 'none';
+        document.getElementById('current-books-section').style.display = 'block';
+      });
+  });
+  
   
