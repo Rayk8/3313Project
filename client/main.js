@@ -1,3 +1,42 @@
+// Handles reload when manually refreshing browser
+window.addEventListener("beforeunload", () => {
+  const returnTo = localStorage.getItem("returnTo");
+  if (!returnTo) {
+    localStorage.removeItem("username");
+  }
+});
+
+// Handles reload of page when logged in
+window.addEventListener("DOMContentLoaded", () => {
+  const username = localStorage.getItem("username");
+  const returnTo = localStorage.getItem("returnTo");
+
+  if (username) {
+    document.getElementById("auth-section").style.display = "none";
+    document.getElementById("navbar-section").style.display = "block";
+    document.getElementById("userDisplay").textContent = username;
+
+    if (returnTo === "current-books") {
+      // Show current books
+      document.getElementById("home-section").style.display = "none";
+      document.getElementById("current-books-section").style.display = "block";
+
+      // Trigger a refresh of the book list
+      fetch(`http://localhost:8080/currentBooks?username=${username}`)
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById("checkedOutList").innerHTML = html;
+        });
+
+      // Clear flag
+      localStorage.removeItem("returnTo");
+    } else {
+      // Default to home
+      document.getElementById("home-section").style.display = "block";
+    }
+  }
+});
+
 // Registration form handler
 document.getElementById("registerForm").addEventListener("submit", function(event) {
     event.preventDefault();
@@ -65,10 +104,53 @@ document.getElementById("registerForm").addEventListener("submit", function(even
     fetch(`http://localhost:8080/currentBooks?username=${username}`)
       .then(res => res.text())
       .then(html => {
+        console.log("CurrentBooks HTML:", html);  
         document.getElementById('checkedOutList').innerHTML = html;
         document.getElementById('home-section').style.display = 'none';
         document.getElementById('current-books-section').style.display = 'block';
+      })
+      .catch(error => {
+        console.error("Failed to fetch current books from nav:", error);
       });
-  });
+  });  
+
+  function checkInBook(bookID) {
+    const username = localStorage.getItem('username');
+  
+    if (!username) {
+      alert("Session expired. Please log in again.");
+      return window.location.reload();
+    }
+  
+    fetch(`http://localhost:8080/checkin?username=${username}&bookID=${bookID}`)
+      .then(response => response.text())
+      .then(msg => {
+        alert(msg);
+  
+       
+        console.log("Username before reloading currentBooks:", username);
+        localStorage.setItem("returnTo", "current-books");
+
+
+        fetch(`http://localhost:8080/currentBooks?username=${username}`)
+          .then(res => {
+            if (!res.ok) throw new Error(`Status: ${res.status}`);
+            return res.text();
+          })
+          .then(html => {
+            document.getElementById('checkedOutList').innerHTML = html;
+            document.getElementById('home-section').style.display = 'none';
+            document.getElementById('current-books-section').style.display = 'block';
+          })
+          .catch(err => {
+            console.error("Reload currentBooks failed:", err);
+            alert("Failed to update view. Please go to 'Current Books' again.");
+          });
+      })
+      .catch(error => {
+        console.error('Check-in error:', error);
+        alert("Check-in failed. Please try again.");
+      });
+  }
   
   

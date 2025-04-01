@@ -61,7 +61,6 @@ void handleClient(int client_socket, Library* library) {
             std::string password = request.substr(posPass + 9, endPass - (posPass + 9));
             if (registerUser(username, password)) {
                 response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nRegistration Successful";
-                // response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nLogin Successful";
             } else {
                 response = "HTTP/1.1 409 Conflict\r\nContent-Type: text/html\r\n\r\nUser Already Exists";
             }
@@ -69,22 +68,38 @@ void handleClient(int client_socket, Library* library) {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nMissing registration parameters";
         }
     }
+
+    else if (request.find("GET /checkin") != std::string::npos) {
+        size_t posUser = request.find("username=");
+        size_t posBook = request.find("bookID=");
+        if (posUser != std::string::npos && posBook != std::string::npos) {
+            size_t endUser = request.find("&", posUser);
+            std::string username = request.substr(posUser + 9, endUser - (posUser + 9));
+            size_t endBook = request.find(" ", posBook);
+            std::string bookID = request.substr(posBook + 7, endBook - (posBook + 7));
+
+            std::string result = library->returnBook(username, bookID);
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + result;
+        } else {
+            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing parameters.";
+        }
+    }
     else if (request.find("GET /currentBooks") != std::string::npos) {
         size_t posUser = request.find("username=");
         if (posUser != std::string::npos) {
             size_t end = request.find(" ", posUser);
             std::string username = request.substr(posUser + 9, end - (posUser + 9));
-            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" 
-                    + library->getCurrentBooks(username);
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" +
+                    library->getCurrentBooks(username);
         } else {
-            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
+            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
         }
     }
-
 
     else {
         response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nInvalid Endpoint";
     }
+    std::cout << "Responding with:\n" << response << std::endl;
 
     write(client_socket, response.c_str(), response.length());
     close(client_socket);

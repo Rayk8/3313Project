@@ -3,6 +3,9 @@
 #include <sstream>
 #include <iostream>
 #include <mutex>
+#include <chrono>
+#include <iomanip>
+#include <ctime>
 
 std::mutex userMutex;
 
@@ -51,14 +54,64 @@ std::string Library::getCurrentBooks(const std::string& username) {
     
     if (users.contains(username)) {
         for (const auto& bookID : users[username]["checkedOutBooks"]) {
-            std::string title = books[bookID]["title"];
+            std::string id = bookID.get<std::string>();
+            std::string title = books[id]["title"];
             oss << "<div class='book-container'>"
-                << "<h3>" << title << " (ID: " << bookID << ")</h3>"
-                << "<button onclick=\"checkInBook('" << bookID << "')\">Check In</button>"
+                << "<h3>" << title << " (ID: " << id << ")</h3>"
+                << "<button onclick=\"checkInBook('" << id << "')\">Check In</button>"
                 << "</div>";
         }
     } else {
         oss << "<p>User not found</p>";
     }
     return oss.str();
+}
+
+std::string Library::returnBook(const std::string& username, const std::string& bookID) {
+    std::lock_guard<std::mutex> lock(userMutex);
+
+    json users = loadJson("Users.json");
+    json books = loadJson("books.json");
+    json transactions = loadJson("Transactions.json");
+
+    if (!users.contains(username)) {
+        return "User not found.";
+    }
+
+    auto& checkedOut = users[username]["checkedOutBooks"];
+    auto it = std::find(checkedOut.begin(), checkedOut.end(), bookID);
+    if (it == checkedOut.end()) {
+        return "Book not currently checked out.";
+    }
+
+    // Get book title
+    std::string title = books.contains(bookID) ? books[bookID]["title"] : "Unknown";
+
+    // Remove from user's checked out books
+    checkedOut.erase(it);
+
+    // Mark book as available
+    if (books.contains(bookID)) {
+        books[bookID]["available"] = true;
+    }
+
+    // Log transaction with timestamp
+    auto now = std::chrono::system_clock::now();
+    std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+    std::ostringstream timestamp;
+    timestamp << std::put_time(std::gmtime(&now_time), "%FT%TZ");
+
+    transactions[username].push_back({
+        {"bookID", bookID},
+        {"title", title},
+        {"action", "return"},
+        {"timestamp", timestamp.str()}
+    });
+
+    // Save everything atomically
+    saveJson("Users.json", users);
+    saveJson("books.json", books);
+    saveJson("Transactions.json", transactions);
+
+    return "Book successfully checked in.";
 }
