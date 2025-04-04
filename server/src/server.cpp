@@ -19,7 +19,10 @@ void handleClient(int client_socket, Library* library) {
     std::string response;
 
     if (request.find("GET /catalog") != std::string::npos) {
-        response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + library->getCatalog();
+        response = "HTTP/1.1 200 OK\r\n"
+               "Content-Type: text/html\r\n"
+               "Access-Control-Allow-Origin: *\r\n"
+               "\r\n" + library->getCatalog();
     }
     else if (request.find("GET /search") != std::string::npos) {
         size_t pos = request.find("query=");
@@ -95,6 +98,22 @@ void handleClient(int client_socket, Library* library) {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
         }
     }
+    else if (request.find("GET /checkout") != std::string::npos) {
+        size_t posUser = request.find("username=");
+        size_t posBook = request.find("bookID=");
+        if (posUser != std::string::npos && posBook != std::string::npos) {
+            size_t endUser = request.find("&", posUser);
+            std::string username = request.substr(posUser + 9, endUser - (posUser + 9));
+            size_t endBook = request.find(" ", posBook);
+            std::string bookID = request.substr(posBook + 7, endBook - (posBook + 7));
+    
+            std::string result = library->borrowBook(username, bookID);
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + result;
+        } else {
+            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nMissing parameters.";
+        }
+    }
+    
 
     else {
         response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nInvalid Endpoint";

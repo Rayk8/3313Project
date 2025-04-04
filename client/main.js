@@ -15,6 +15,7 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById("auth-section").style.display = "none";
     document.getElementById("navbar-section").style.display = "block";
     document.getElementById("userDisplay").textContent = username;
+    document.getElementById("home-section").style.display = "block";
 
     if (returnTo === "current-books") {
       // Show current books
@@ -33,6 +34,15 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       // Default to home
       document.getElementById("home-section").style.display = "block";
+      fetch("http://localhost:8080/catalog")
+        .then(res => res.text())
+        .then(html => {
+          console.log("Available books HTML:", html);
+          document.getElementById("availableBooksList").innerHTML = html;
+        })
+        .catch(err => {
+          console.error("Failed to load available books on reload:", err);
+        });
     }
   }
 });
@@ -72,6 +82,15 @@ document.getElementById("registerForm").addEventListener("submit", function(even
           document.getElementById('current-books-section').style.display = 'none';
           document.getElementById("userDisplay").textContent = username;
         }
+        fetch("http://localhost:8080/catalog")
+  .then(res => res.text())
+  .then(html => {
+    console.log("Catalog HTML after login:", html);
+    document.getElementById("availableBooksList").innerHTML = html;
+  })
+  .catch(err => {
+    console.error("Failed to load catalog after login:", err);
+  });
       })
       .catch(error => {
         console.error("Login error:", error);
@@ -113,6 +132,39 @@ document.getElementById("registerForm").addEventListener("submit", function(even
         console.error("Failed to fetch current books from nav:", error);
       });
   });  
+  function checkoutBook(bookID) {
+    const username = localStorage.getItem("username");
+  
+    if (!username) {
+      alert("Please log in first.");
+      return;
+    }
+  
+    fetch(`http://localhost:8080/checkout?username=${username}&bookID=${bookID}`)
+      .then(res => res.text())
+      .then(msg => {
+        alert(msg);
+  
+       
+        fetch("http://localhost:8080/catalog")
+          .then(res => res.text())
+          .then(html => {
+            document.getElementById("availableBooksList").innerHTML = html;
+          });
+  
+        
+        fetch(`http://localhost:8080/currentBooks?username=${username}`)
+          .then(res => res.text())
+          .then(html => {
+            document.getElementById("checkedOutList").innerHTML = html;
+          });
+      })
+      .catch(err => {
+        console.error("Checkout error:", err);
+        alert("Failed to borrow the book.");
+      });
+  }
+  
 
   function checkInBook(bookID) {
     const username = localStorage.getItem('username');
@@ -127,11 +179,10 @@ document.getElementById("registerForm").addEventListener("submit", function(even
       .then(msg => {
         alert(msg);
   
-       
         console.log("Username before reloading currentBooks:", username);
         localStorage.setItem("returnTo", "current-books");
-
-
+  
+        
         fetch(`http://localhost:8080/currentBooks?username=${username}`)
           .then(res => {
             if (!res.ok) throw new Error(`Status: ${res.status}`);
@@ -141,10 +192,16 @@ document.getElementById("registerForm").addEventListener("submit", function(even
             document.getElementById('checkedOutList').innerHTML = html;
             document.getElementById('home-section').style.display = 'none';
             document.getElementById('current-books-section').style.display = 'block';
+  
+            return fetch("http://localhost:8080/catalog");
+          })
+          .then(res => res.text())
+          .then(html => {
+            document.getElementById("availableBooksList").innerHTML = html;
           })
           .catch(err => {
-            console.error("Reload currentBooks failed:", err);
-            alert("Failed to update view. Please go to 'Current Books' again.");
+            console.error("Reload currentBooks or catalog failed:", err);
+            alert("Failed to update views. Please refresh.");
           });
       })
       .catch(error => {
@@ -152,5 +209,6 @@ document.getElementById("registerForm").addEventListener("submit", function(even
         alert("Check-in failed. Please try again.");
       });
   }
+  
   
   

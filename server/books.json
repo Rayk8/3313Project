@@ -1,18 +1,53 @@
 {
     "B001": {
-        "available": false,
-        "title": "The C++ Programming Language"
+      "available": true,
+      "title": "The C++ Programming Language",
+      "borrower": ""
     },
     "B002": {
-        "available": true,
-        "title": "Clean Code"
+      "available": true,
+      "title": "Clean Code",
+      "borrower": ""
     },
     "B003": {
-        "available": false,
-        "title": "Introduction to Algorithms"
+      "available": true,
+      "title": "Introduction to Algorithms",
+      "borrower": ""
     },
     "B004": {
-        "available": true,
-        "title": "Design Patterns"
+      "available": true,
+      "title": "Design Patterns",
+      "borrower": ""
+    },
+    "B005": {
+      "available": true,
+      "title": "Effective Modern C++",
+      "borrower": ""
+    },
+    "B006": {
+      "available": true,
+      "title": "Refactoring",
+      "borrower": ""
+    },
+    "B007": {
+      "available": true,
+      "title": "Cracking the Coding Interview",
+      "borrower": ""
+    },
+    "B008": {
+      "available": true,
+      "title": "The Pragmatic Programmer",
+      "borrower": ""
+    },
+    "B009": {
+      "available": true,
+      "title": "Python Crash Course",
+      "borrower": ""
+    },
+    "B010": {
+      "available": true,
+      "title": "Artificial Intelligence: A Modern Approach",
+      "borrower": ""
     }
-}
+  }
+  
