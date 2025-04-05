@@ -22,6 +22,7 @@ void Library::loadBooks() {
         b.title = info["title"];
         b.available = info["available"];
         b.borrower = info["borrower"];
+        b.image = info["image"];
         books[bookID] = b;
     }
 }
@@ -34,11 +35,12 @@ std::string Library::getCatalog() {
         const Book& book = pair.second;
 
         html += "<div style='border: 1px solid #ccc; padding: 1rem; width: 250px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);'>";
-        html += "<h3>" + book.title + "</h3>";
-        html += "<p><strong>ID:</strong> " + book.bookID + "</p>";
+        html += "<img src='" + book.image + "' alt='Cover' style='width:100%; height:180px; object-fit:contain; margin-bottom:10px;'>";
+html += "<h3>" + book.title + "</h3>";
+html += "<p><strong>ID:</strong> " + book.bookID + "</p>";
 
         if (book.available) {
-            html += "<button onclick=\"checkoutBook('" + book.bookID + "')\">Borrow</button>";
+            html += "<button  class='borrow-btn' onclick=\"checkoutBook('" + book.bookID + "')\">Borrow</button>";
         } else {
             html += "<button disabled>Checked out by " + book.borrower + "</button>";
         }

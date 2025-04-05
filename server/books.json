@@ -1,53 +1,183 @@
 {
     "B001": {
-      "available": true,
       "title": "The C++ Programming Language",
-      "borrower": ""
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0321563840-L.jpg"
     },
     "B002": {
-      "available": true,
       "title": "Clean Code",
-      "borrower": ""
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0132350882-L.jpg"
     },
     "B003": {
-      "available": true,
       "title": "Introduction to Algorithms",
-      "borrower": ""
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0262033844-L.jpg"
     },
     "B004": {
-      "available": true,
       "title": "Design Patterns",
-      "borrower": ""
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0201633612-L.jpg"
     },
     "B005": {
-      "available": true,
-      "title": "Effective Modern C++",
-      "borrower": ""
+    "title": "Artificial Intelligence: A Modern Approach",
+    "available": true,
+    "borrower": "",
+    "image": "https://covers.openlibrary.org/b/isbn/0136042597-L.jpg"
     },
     "B006": {
+      "title": "JavaScript: The Good Parts",
       "available": true,
-      "title": "Refactoring",
-      "borrower": ""
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0596517742-L.jpg"
     },
     "B007": {
+      "title": "Python Crash Course",
       "available": true,
-      "title": "Cracking the Coding Interview",
-      "borrower": ""
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/1593279280-L.jpg"
     },
     "B008": {
+      "title": "Automate the Boring Stuff with Python",
       "available": true,
-      "title": "The Pragmatic Programmer",
-      "borrower": ""
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/1593275994-L.jpg"
     },
     "B009": {
+      "title": "Fluent Python",
       "available": true,
-      "title": "Python Crash Course",
-      "borrower": ""
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/1491946008-L.jpg"
     },
     "B010": {
+      "title": "Effective Java",
       "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0134685997-L.jpg"
+    },
+    "B011": {
+      "title": "Java Concurrency in Practice",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0321349601-L.jpg"
+    },
+    "B012": {
+      "title": "The Pragmatic Programmer",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/020161622X-L.jpg"
+    },
+    "B013": {
+      "title": "Refactoring",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0201485672-L.jpg"
+    },
+    "B014": {
+      "title": "The Mythical Man-Month",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0201835959-L.jpg"
+    },
+    "B015": {
+      "title": "Structure and Interpretation of Computer Programs",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0262510871-L.jpg"
+    },
+    "B016": {
+      "title": "Operating System Concepts",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/1119456339-L.jpg"
+    },
+    "B017": {
+      "title": "Computer Networking: A Top-Down Approach",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0133594149-L.jpg"
+    },
+    "B018": {
+      "title": "Compilers: Principles, Techniques, and Tools",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0321486811-L.jpg"
+    },
+    "B019": {
+      "title": "Head First Design Patterns",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0596007124-L.jpg"
+    },
+    "B020": {
+      "title": "Introduction to the Theory of Computation",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/113318779X-L.jpg"
+    },
+    "B021": {
+      "title": "Deep Learning",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0262035618-L.jpg"
+    },
+    "B022": {
+      "title": "Pattern Recognition and Machine Learning",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0387310738-L.jpg"
+    },
+    "B023": {
+      "title": "Hands-On Machine Learning with Scikit-Learn and TensorFlow",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/1491962291-L.jpg"
+    },
+    "B024": {
       "title": "Artificial Intelligence: A Modern Approach",
-      "borrower": ""
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0136042597-L.jpg"
+    },
+    "B025": {
+      "title": "The Art of Computer Programming",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0201896834-L.jpg"
+    },
+    "B026": {
+      "title": "Code Complete",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0735619670-L.jpg"
+    },
+    "B027": {
+      "title": "Grokking Algorithms",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/1617292230-L.jpg"
+    },
+    "B028": {
+      "title": "Cracking the Coding Interview",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/0984782850-L.jpg"
+    },
+    "B029": {
+      "title": "Algorithms",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/032157351X-L.jpg"
+    },
+    "B030": {
+      "title": "Computer Systems: A Programmer's Perspective",
+      "available": true,
+      "borrower": "",
+      "image": "https://covers.openlibrary.org/b/isbn/013409266X-L.jpg"
     }
   }
   

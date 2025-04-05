@@ -159,3 +159,24 @@ body {
     flex-direction: column;
     gap: 1rem;
   }
+
+  .book-container img {
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .borrow-btn {
+    background-color: #4CAF50;     
+    color: white;                     
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .borrow-btn:hover {
+    background-color: #45a049;         
+  }

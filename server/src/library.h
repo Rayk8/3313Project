@@ -13,6 +13,7 @@ struct Book {
     std::string title;
     bool available;
     std::string borrower;
+    std::string image;
 };
 
 class Library {
