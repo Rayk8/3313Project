@@ -31,7 +31,34 @@ window.addEventListener("DOMContentLoaded", () => {
 
       // Clear flag
       localStorage.removeItem("returnTo");
-    } else {
+    } 
+    else if (returnTo === "ratings") {
+      document.getElementById("home-section").style.display = "none";
+      document.getElementById("current-books-section").style.display = "none";
+      document.getElementById("ratings-section").style.display = "block";
+    
+      fetch(`http://localhost:8080/ratings?username=${username}`)
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById("ratingsList").innerHTML = html;
+        });
+    
+      localStorage.removeItem("returnTo");
+    }    
+    else if (returnTo === "home") {
+      document.getElementById("home-section").style.display = "block";
+      document.getElementById("current-books-section").style.display = "none";
+      document.getElementById("ratings-section").style.display = "none";
+    
+      fetch("http://localhost:8080/catalog")
+        .then(res => res.text())
+        .then(html => {
+          document.getElementById("availableBooksList").innerHTML = html;
+        });
+    
+      localStorage.removeItem("returnTo");
+    }    
+    else {
       // Default to home
       document.getElementById("home-section").style.display = "block";
       fetch("http://localhost:8080/catalog")
@@ -115,6 +142,17 @@ document.getElementById("registerForm").addEventListener("submit", function(even
     e.preventDefault();
     document.getElementById('home-section').style.display = 'block';
     document.getElementById('current-books-section').style.display = 'none';
+    document.getElementById('ratings-section').style.display = 'none';
+
+    fetch("http://localhost:8080/catalog")
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById("availableBooksList").innerHTML = html;
+    })
+    .catch(err => {
+      console.error("Failed to reload catalog on Home click:", err);
+    });
+
   });
 
   document.getElementById('navCurrentBooks').addEventListener('click', (e) => {
@@ -127,6 +165,7 @@ document.getElementById("registerForm").addEventListener("submit", function(even
         document.getElementById('checkedOutList').innerHTML = html;
         document.getElementById('home-section').style.display = 'none';
         document.getElementById('current-books-section').style.display = 'block';
+        document.getElementById('ratings-section').style.display = 'none';
       })
       .catch(error => {
         console.error("Failed to fetch current books from nav:", error);
@@ -139,6 +178,8 @@ document.getElementById("registerForm").addEventListener("submit", function(even
       alert("Please log in first.");
       return;
     }
+
+    localStorage.setItem("returnTo", "home");
   
     fetch(`http://localhost:8080/checkout?username=${username}&bookID=${bookID}`)
       .then(res => res.text())
@@ -209,6 +250,50 @@ document.getElementById("registerForm").addEventListener("submit", function(even
         alert("Check-in failed. Please try again.");
       });
   }
+  
+  function submitRating(bookID) {
+    const username = localStorage.getItem("username");
+    const select = document.getElementById(`rating_${bookID}`);
+    const rating = select.value;
+  
+    if (!rating) {
+      alert("Please select a rating before submitting.");
+      return;
+    }
+  
+    localStorage.setItem("returnTo", "ratings");
+  
+    fetch(`http://localhost:8080/rate?username=${username}&bookID=${bookID}&rating=${rating}`)
+      .then(res => res.text())
+      .then(msg => {
+        alert(msg);
+  
+      })
+      .catch(err => {
+        console.error("Rating error:", err);
+        alert("Failed to submit rating.");
+      });
+  }
+
+  document.getElementById("navRatings").addEventListener("click", (e) => {
+    e.preventDefault();
+    const username = localStorage.getItem("username");
+  
+    document.getElementById("home-section").style.display = "none";
+    document.getElementById("current-books-section").style.display = "none";
+    document.getElementById("ratings-section").style.display = "none";
+
+    fetch(`http://localhost:8080/ratings?username=${username}`)
+      .then(res => res.text())
+      .then(html => {
+        document.getElementById("ratingsList").innerHTML = html;
+        document.getElementById("ratings-section").style.display = "block";
+      })
+      .catch(err => {
+        console.error("Failed to load ratings:", err);
+        alert("Could not load ratings.");
+      });
+  });
   
   
   

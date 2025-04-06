@@ -113,7 +113,39 @@ void handleClient(int client_socket, Library* library) {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nMissing parameters.";
         }
     }
-    
+    else if (request.find("GET /rate") != std::string::npos) {
+        size_t posUser = request.find("username=");
+        size_t posBook = request.find("bookID=");
+        size_t posRating = request.find("rating=");
+        
+        if (posUser != std::string::npos && posBook != std::string::npos && posRating != std::string::npos) {
+            size_t endUser = request.find("&", posUser);
+            size_t endBook = request.find("&", posBook);
+            size_t endRating = request.find(" ", posRating);
+
+            std::string username = request.substr(posUser + 9, endUser - (posUser + 9));
+            std::string bookID = request.substr(posBook + 7, endBook - (posBook + 7));
+            std::string ratingStr = request.substr(posRating + 7, endRating - (posRating + 7));
+            int rating = std::stoi(ratingStr);
+
+            std::string result = library->rateBook(username, bookID, rating);
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + result;
+        } else {
+            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\n\r\nMissing parameters.";
+        }
+    }
+    else if (request.find("GET /ratings") != std::string::npos) {
+        size_t pos = request.find("username=");
+        if (pos != std::string::npos) {
+            size_t end = request.find(" ", pos);
+            std::string username = request.substr(pos + 9, end - (pos + 9));
+
+            std::string html = library->getRatingsHtml(username);
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + html;
+        } else {
+            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
+        }
+    }
 
     else {
         response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nInvalid Endpoint";

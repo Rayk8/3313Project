@@ -82,6 +82,16 @@ std::string Library::getCurrentBooks(const std::string& username) {
             std::string title = books[id]["title"];
             oss << "<div class='book-container'>"
                 << "<h3>" << title << " (ID: " << id << ")</h3>"
+                << "<label for='rating_" << id << "'>Rate this book: </label>"
+                << "<select id='rating_" << id << "'>"
+                << "<option value=''>--</option>"
+                << "<option value='1'>1</option>"
+                << "<option value='2'>2</option>"
+                << "<option value='3'>3</option>"
+                << "<option value='4'>4</option>"
+                << "<option value='5'>5</option>"
+                << "</select> "
+                << "<button onclick=\"submitRating('" << id << "')\">Submit Rating</button><br><br>"
                 << "<button onclick=\"checkInBook('" << id << "')\">Check In</button>"
                 << "</div>";
         }
@@ -193,4 +203,43 @@ std::string Library::returnBook(const std::string& username, const std::string& 
     }
 
     return "Book successfully checked in.";
+}
+
+std::string Library::rateBook(const std::string& username, const std::string& bookID, int rating) {
+    std::lock_guard<std::mutex> lock(userMutex);
+    json ratings = loadJson("Ratings.json");
+
+    ratings[username][bookID] = rating;
+    saveJson("Ratings.json", ratings);
+
+    return "Thank you for rating!";
+}
+
+std::string Library::getRatingsHtml(const std::string& username) {
+    std::lock_guard<std::mutex> lock(libraryMutex);
+
+    json ratings = loadJson("Ratings.json");
+    json booksData = loadJson("books.json");
+
+    if (!ratings.contains(username)) return "<p>You haven't rated any books yet.</p>";
+
+    std::ostringstream html;
+    html << "<div style='display: flex; flex-wrap: wrap; gap: 1rem;'>";
+
+    for (auto& [bookID, rating] : ratings[username].items()) {
+        if (!booksData.contains(bookID)) continue;
+
+        const auto& book = booksData[bookID];
+        std::string title = book["title"];
+        std::string image = book["image"];
+
+        html << "<div style='border: 1px solid #ccc; padding: 1rem; width: 250px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);'>";
+        html << "<img src='" << image << "' alt='Book cover' style='width:100%; height:180px; object-fit:contain; margin-bottom:10px;'>";
+        html << "<h3>" << title << "</h3>";
+        html << "<p><strong>Your Rating:</strong> " << rating << " / 5</p>";
+        html << "</div>";
+    }
+
+    html << "</div>";
+    return html.str();
 }

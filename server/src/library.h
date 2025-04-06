@@ -25,6 +25,8 @@ public:
     std::string getCurrentBooks(const std::string& username);
     std::string returnBook(const std::string& username, const std::string& bookID);
     std::string borrowBook(const std::string& username, const std::string& bookID);
+    std::string rateBook(const std::string& username, const std::string& bookID, int rating);
+    std::string getRatingsHtml(const std::string& username);
 
 private:
     void loadBooks();
