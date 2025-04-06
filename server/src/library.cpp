@@ -6,8 +6,17 @@
 #include <chrono>
 #include <iomanip>
 #include <ctime>
+#include <algorithm> // for std::transform
 
 std::mutex userMutex;
+
+// Helper to convert a string to lowercase
+static std::string toLower(const std::string &input) {
+    std::string output = input;
+    std::transform(output.begin(), output.end(), output.begin(),
+                   [](unsigned char c){ return std::tolower(c); });
+    return output;
+}
 
 Library::Library() {
     loadBooks(); 
@@ -15,7 +24,6 @@ Library::Library() {
 
 void Library::loadBooks() {
     json bookData = loadJson("books.json");
-
     for (auto& [bookID, info] : bookData.items()) {
         Book b;
         b.bookID = bookID;
@@ -27,6 +35,11 @@ void Library::loadBooks() {
     }
 }
 
+void Library::saveBooks() {
+    // If you need to write back to books.json, do it here.
+    // Currently, we only read from books.json in this example.
+}
+
 std::string Library::getCatalog() {
     std::lock_guard<std::mutex> lock(libraryMutex);
     std::string html = "<div style='display: flex; flex-wrap: wrap; gap: 1rem;'>";
@@ -34,13 +47,15 @@ std::string Library::getCatalog() {
     for (const auto& pair : books) {
         const Book& book = pair.second;
 
-        html += "<div style='border: 1px solid #ccc; padding: 1rem; width: 250px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);'>";
-        html += "<img src='" + book.image + "' alt='Cover' style='width:100%; height:180px; object-fit:contain; margin-bottom:10px;'>";
-html += "<h3>" + book.title + "</h3>";
-html += "<p><strong>ID:</strong> " + book.bookID + "</p>";
+        html += "<div style='border: 1px solid #ccc; padding: 1rem; width: 250px; "
+                "border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);'>";
+        html += "<img src='" + book.image + "' alt='Cover' style='width:100%; height:180px; "
+                "object-fit:contain; margin-bottom:10px;'>";
+        html += "<h3>" + book.title + "</h3>";
+        html += "<p><strong>ID:</strong> " + book.bookID + "</p>";
 
         if (book.available) {
-            html += "<button  class='borrow-btn' onclick=\"checkoutBook('" + book.bookID + "')\">Borrow</button>";
+            html += "<button class='borrow-btn' onclick=\"checkoutBook('" + book.bookID + "')\">Borrow</button>";
         } else {
             html += "<button disabled>Checked out by " + book.borrower + "</button>";
         }
@@ -53,33 +68,68 @@ html += "<p><strong>ID:</strong> " + book.bookID + "</p>";
 }
 
 std::string Library::searchBooks(const std::string& query) {
-    json books = loadJson("books.json");
+    // Load the latest books from books.json
+    json booksData = loadJson("books.json");
+
+    // We'll build a flex container for matching books
     std::ostringstream oss;
-    oss << "<html><body><h1>Search Results</h1><ul>";
-    for (auto it = books.begin(); it != books.end(); ++it) {
+    oss << "<h2>Search Results for \"" << query << "\"</h2>"
+        << "<div style='display: flex; flex-wrap: wrap; gap: 1rem;'>";
+
+    // Convert the query to lowercase once
+    std::string lowerQuery = toLower(query);
+
+    bool foundAny = false;
+    for (auto it = booksData.begin(); it != booksData.end(); ++it) {
         std::string bookID = it.key();
         std::string title = it.value()["title"];
         bool available = it.value()["available"];
-        if (title.find(query) != std::string::npos) {  // simple substring search
-            oss << "<li>" << title << " (ID: " << bookID << ") - " 
-                << (available ? "Available" : "Checked Out") << "</li>";
+        std::string borrower = it.value()["borrower"];
+        std::string image = it.value()["image"];
+
+        // Convert the title to lowercase
+        std::string lowerTitle = toLower(title);
+
+        // Case-insensitive substring search
+        if (lowerTitle.find(lowerQuery) != std::string::npos) {
+            foundAny = true;
+            // Create a card for this matching book
+            oss << "<div style='border: 1px solid #ccc; padding: 1rem; width: 250px; "
+                   "border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);'>";
+            oss << "<img src='" + image + "' alt='Cover' style='width:100%; height:180px; "
+                   "object-fit:contain; margin-bottom:10px;'>";
+            oss << "<h3>" << title << "</h3>";
+            oss << "<p><strong>ID:</strong> " << bookID << "</p>";
+
+            if (available) {
+                oss << "<button class='borrow-btn' onclick=\"checkoutBook('" << bookID << "')\">Borrow</button>";
+            } else {
+                oss << "<button disabled>Checked out by " << borrower << "</button>";
+            }
+            oss << "</div>";
         }
     }
-    oss << "</ul></body></html>";
+
+    oss << "</div>";
+
+    if (!foundAny) {
+        return "<h2>Search Results for \"" + query + "\"</h2>"
+               "<p>No books found matching your query.</p>";
+    }
+
     return oss.str();
 }
 
 std::string Library::getCurrentBooks(const std::string& username) {
     std::lock_guard<std::mutex> lock(userMutex);
     json users = loadJson("Users.json");
-    json books = loadJson("books.json");
+    json booksData = loadJson("books.json");
 
     std::ostringstream oss;
-    
     if (users.contains(username)) {
         for (const auto& bookID : users[username]["checkedOutBooks"]) {
             std::string id = bookID.get<std::string>();
-            std::string title = books[id]["title"];
+            std::string title = booksData[id]["title"];
             oss << "<div class='book-container'>"
                 << "<h3>" << title << " (ID: " << id << ")</h3>"
                 << "<label for='rating_" << id << "'>Rate this book: </label>"
@@ -111,23 +161,21 @@ std::string Library::borrowBook(const std::string& username, const std::string& 
     if (!booksData.contains(bookID)) {
         return "Book not found.";
     }
-
     if (!booksData[bookID]["available"]) {
         return "Book is already checked out by " + booksData[bookID]["borrower"].get<std::string>();
     }
 
-    // update book data
+    // Update book data
     booksData[bookID]["available"] = false;
     booksData[bookID]["borrower"] = username;
 
-    // update user data
+    // Update user data
     if (!users.contains(username)) {
         users[username] = { {"checkedOutBooks", json::array()} };
     }
-
     users[username]["checkedOutBooks"].push_back(bookID);
 
-    // log transaction
+    // Log transaction
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
     std::ostringstream timestamp;
@@ -140,12 +188,12 @@ std::string Library::borrowBook(const std::string& username, const std::string& 
         {"timestamp", timestamp.str()}
     });
 
-    // save all changes
+    // Save changes
     saveJson("books.json", booksData);
     saveJson("Users.json", users);
     saveJson("Transactions.json", transactions);
 
-    // also update in-memory map
+    // Update in-memory map
     if (books.find(bookID) != books.end()) {
         books[bookID].available = false;
         books[bookID].borrower = username;
@@ -158,7 +206,7 @@ std::string Library::returnBook(const std::string& username, const std::string& 
     std::lock_guard<std::mutex> lock(userMutex);
 
     json users = loadJson("Users.json");
-    json books = loadJson("books.json");
+    json booksData = loadJson("books.json");
     json transactions = loadJson("Transactions.json");
 
     if (!users.contains(username)) return "User not found.";
@@ -167,18 +215,18 @@ std::string Library::returnBook(const std::string& username, const std::string& 
     auto it = std::find(checkedOut.begin(), checkedOut.end(), bookID);
     if (it == checkedOut.end()) return "Book not currently checked out.";
 
-    std::string title = books.contains(bookID) ? books[bookID]["title"] : "Unknown";
+    std::string title = booksData.contains(bookID) ? booksData[bookID]["title"] : "Unknown";
 
-    // remove from user
+    // Remove from user
     checkedOut.erase(it);
 
-    // mark book available
-    if (books.contains(bookID)) {
-        books[bookID]["available"] = true;
-        books[bookID]["borrower"] = "";  // <- This part is key
+    // Mark book available
+    if (booksData.contains(bookID)) {
+        booksData[bookID]["available"] = true;
+        booksData[bookID]["borrower"] = "";
     }
 
-    // log transaction
+    // Log transaction
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
     std::ostringstream timestamp;
@@ -191,12 +239,12 @@ std::string Library::returnBook(const std::string& username, const std::string& 
         {"timestamp", timestamp.str()}
     });
 
-    // save changes
+    // Save changes
     saveJson("Users.json", users);
-    saveJson("books.json", books);
+    saveJson("books.json", booksData);
     saveJson("Transactions.json", transactions);
 
-    // udate in-memory map
+    // Update in-memory map
     if (this->books.find(bookID) != this->books.end()) {
         this->books[bookID].available = true;
         this->books[bookID].borrower = "";
@@ -221,7 +269,9 @@ std::string Library::getRatingsHtml(const std::string& username) {
     json ratings = loadJson("Ratings.json");
     json booksData = loadJson("books.json");
 
-    if (!ratings.contains(username)) return "<p>You haven't rated any books yet.</p>";
+    if (!ratings.contains(username)) {
+        return "<p>You haven't rated any books yet.</p>";
+    }
 
     std::ostringstream html;
     html << "<div style='display: flex; flex-wrap: wrap; gap: 1rem;'>";
@@ -233,8 +283,10 @@ std::string Library::getRatingsHtml(const std::string& username) {
         std::string title = book["title"];
         std::string image = book["image"];
 
-        html << "<div style='border: 1px solid #ccc; padding: 1rem; width: 250px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);'>";
-        html << "<img src='" << image << "' alt='Book cover' style='width:100%; height:180px; object-fit:contain; margin-bottom:10px;'>";
+        html << "<div style='border: 1px solid #ccc; padding: 1rem; width: 250px; "
+                "border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1);'>";
+        html << "<img src='" << image << "' alt='Book cover' style='width:100%; height:180px; "
+                "object-fit:contain; margin-bottom:10px;'>";
         html << "<h3>" << title << "</h3>";
         html << "<p><strong>Your Rating:</strong> " << rating << " / 5</p>";
         html << "</div>";
@@ -279,4 +331,3 @@ std::string Library::getHistoryHtml(const std::string& username) {
     html << "</div>";
     return html.str();
 }
-

@@ -38,3 +38,4 @@ private:
 };
 
 #endif // LIBRARY_H
+

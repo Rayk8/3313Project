@@ -8,6 +8,16 @@
 #include <cstdlib>
 #include <string>
 
+// A quick hack to replace "%20" with a space.
+// For a more robust solution, you'd decode all URL-encoded characters.
+std::string urlDecode(std::string s) {
+    size_t pos;
+    while ((pos = s.find("%20")) != std::string::npos) {
+        s.replace(pos, 3, " ");
+    }
+    return s;
+}
+
 void handleClient(int client_socket, Library* library) {
     char buffer[2048] = {0};
     int bytesRead = read(client_socket, buffer, 2048);
@@ -20,17 +30,26 @@ void handleClient(int client_socket, Library* library) {
 
     if (request.find("GET /catalog") != std::string::npos) {
         response = "HTTP/1.1 200 OK\r\n"
-               "Content-Type: text/html\r\n"
-               "Access-Control-Allow-Origin: *\r\n"
-               "\r\n" + library->getCatalog();
+                   "Content-Type: text/html\r\n"
+                   "Access-Control-Allow-Origin: *\r\n"
+                   "\r\n" + library->getCatalog();
     }
     else if (request.find("GET /search") != std::string::npos) {
         size_t pos = request.find("query=");
         if (pos != std::string::npos) {
-            size_t end = request.find(" ", pos);
-            std::string query = request.substr(pos + 6, end - (pos + 6));
-            // response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n" + library->searchBooks(query);
-            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + library->searchBooks(query);
+            // Extract the raw query parameter
+            size_t start = pos + 6;
+            size_t end = request.find(" ", start);
+            if (end == std::string::npos) {
+                end = request.find("\r\n", start);
+            }
+            std::string query = request.substr(start, end - start);
+
+            // Decode any '%20' to spaces
+            query = urlDecode(query);
+
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n"
+                       + library->searchBooks(query);
         } else {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nMissing query parameter";
         }
@@ -44,9 +63,7 @@ void handleClient(int client_socket, Library* library) {
             size_t endPass = request.find(" ", posPass);
             std::string password = request.substr(posPass + 9, endPass - (posPass + 9));
             if (loginUser(username, password)) {
-                // response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\nLogin Successful";
                 response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nLogin Successful";
-
             } else {
                 response = "HTTP/1.1 401 Unauthorized\r\nContent-Type: text/html\r\n\r\nLogin Failed";
             }
@@ -71,7 +88,6 @@ void handleClient(int client_socket, Library* library) {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\n\r\nMissing registration parameters";
         }
     }
-
     else if (request.find("GET /checkin") != std::string::npos) {
         size_t posUser = request.find("username=");
         size_t posBook = request.find("bookID=");
@@ -80,7 +96,6 @@ void handleClient(int client_socket, Library* library) {
             std::string username = request.substr(posUser + 9, endUser - (posUser + 9));
             size_t endBook = request.find(" ", posBook);
             std::string bookID = request.substr(posBook + 7, endBook - (posBook + 7));
-
             std::string result = library->returnBook(username, bookID);
             response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + result;
         } else {
@@ -106,7 +121,6 @@ void handleClient(int client_socket, Library* library) {
             std::string username = request.substr(posUser + 9, endUser - (posUser + 9));
             size_t endBook = request.find(" ", posBook);
             std::string bookID = request.substr(posBook + 7, endBook - (posBook + 7));
-    
             std::string result = library->borrowBook(username, bookID);
             response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + result;
         } else {
@@ -117,17 +131,14 @@ void handleClient(int client_socket, Library* library) {
         size_t posUser = request.find("username=");
         size_t posBook = request.find("bookID=");
         size_t posRating = request.find("rating=");
-        
         if (posUser != std::string::npos && posBook != std::string::npos && posRating != std::string::npos) {
             size_t endUser = request.find("&", posUser);
             size_t endBook = request.find("&", posBook);
             size_t endRating = request.find(" ", posRating);
-
             std::string username = request.substr(posUser + 9, endUser - (posUser + 9));
             std::string bookID = request.substr(posBook + 7, endBook - (posBook + 7));
             std::string ratingStr = request.substr(posRating + 7, endRating - (posRating + 7));
             int rating = std::stoi(ratingStr);
-
             std::string result = library->rateBook(username, bookID, rating);
             response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + result;
         } else {
@@ -139,31 +150,28 @@ void handleClient(int client_socket, Library* library) {
         if (pos != std::string::npos) {
             size_t end = request.find(" ", pos);
             std::string username = request.substr(pos + 9, end - (pos + 9));
-
             std::string html = library->getRatingsHtml(username);
             response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + html;
         } else {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
         }
-    } else if (request.find("GET /history") != std::string::npos) {
+    }
+    else if (request.find("GET /history") != std::string::npos) {
         size_t pos = request.find("username=");
         if (pos != std::string::npos) {
             size_t end = request.find(" ", pos);
             std::string username = request.substr(pos + 9, end - (pos + 9));
-    
             std::string html = library->getHistoryHtml(username);
             response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + html;
         } else {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
         }
     }
-       
-
     else {
         response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nInvalid Endpoint";
     }
-    std::cout << "Responding with:\n" << response << std::endl;
 
+    std::cout << "Responding with:\n" << response << std::endl;
     write(client_socket, response.c_str(), response.length());
     close(client_socket);
 }
@@ -182,7 +190,6 @@ void Server::start() {
         perror("Socket creation failed");
         exit(EXIT_FAILURE);
     }
-
     if (setsockopt(server_fd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
         perror("setsockopt failed");
         exit(EXIT_FAILURE);
@@ -196,7 +203,6 @@ void Server::start() {
         perror("Bind failed");
         exit(EXIT_FAILURE);
     }
-
     if (listen(server_fd, 3) < 0) {
         perror("Listen failed");
         exit(EXIT_FAILURE);
