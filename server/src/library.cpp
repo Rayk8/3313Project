@@ -131,7 +131,7 @@ std::string Library::borrowBook(const std::string& username, const std::string& 
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
     std::ostringstream timestamp;
-    timestamp << std::put_time(std::gmtime(&now_time), "%FT%TZ");
+    timestamp << std::put_time(std::localtime(&now_time), "%Y-%m-%d %I:%M %p");
 
     transactions[username].push_back({
         {"bookID", bookID},
@@ -182,7 +182,7 @@ std::string Library::returnBook(const std::string& username, const std::string& 
     auto now = std::chrono::system_clock::now();
     std::time_t now_time = std::chrono::system_clock::to_time_t(now);
     std::ostringstream timestamp;
-    timestamp << std::put_time(std::gmtime(&now_time), "%FT%TZ");
+    timestamp << std::put_time(std::localtime(&now_time), "%Y-%m-%d %I:%M %p");
 
     transactions[username].push_back({
         {"bookID", bookID},
@@ -243,3 +243,40 @@ std::string Library::getRatingsHtml(const std::string& username) {
     html << "</div>";
     return html.str();
 }
+
+std::string Library::getHistoryHtml(const std::string& username) {
+    std::lock_guard<std::mutex> lock(libraryMutex);
+    json transactions = loadJson("Transactions.json");
+
+    if (!transactions.contains(username)) {
+        return "<p>You have no book history yet.</p>";
+    }
+
+    std::ostringstream html;
+    html << "<div style='display: flex; flex-direction: column; gap: 1rem;'>";
+
+    for (const auto& entry : transactions[username]) {
+        if (entry["action"] != "return") continue;
+
+        std::string rawTime = entry["timestamp"];
+        std::tm tm = {};
+        std::istringstream ss(rawTime);
+        ss >> std::get_time(&tm, "%Y-%m-%d %I:%M %p");
+
+        if (ss.fail()) {
+            std::cerr << "Failed to parse timestamp: " << rawTime << std::endl;
+        }
+
+        char formatted[100];
+        std::strftime(formatted, sizeof(formatted), "%B %d, %Y at %I:%M %p", &tm);
+
+        html << "<div class='book-container'>";
+        html << "<h3>" << entry["title"].get<std::string>() << "</h3>";
+        html << "<p><strong>Returned at:</strong> " << formatted << "</p>";
+        html << "</div>";
+    }
+
+    html << "</div>";
+    return html.str();
+}
+

@@ -145,7 +145,19 @@ void handleClient(int client_socket, Library* library) {
         } else {
             response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/plain\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
         }
+    } else if (request.find("GET /history") != std::string::npos) {
+        size_t pos = request.find("username=");
+        if (pos != std::string::npos) {
+            size_t end = request.find(" ", pos);
+            std::string username = request.substr(pos + 9, end - (pos + 9));
+    
+            std::string html = library->getHistoryHtml(username);
+            response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\n" + html;
+        } else {
+            response = "HTTP/1.1 400 Bad Request\r\nContent-Type: text/html\r\nAccess-Control-Allow-Origin: *\r\n\r\nMissing username";
+        }
     }
+       
 
     else {
         response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/html\r\n\r\nInvalid Endpoint";

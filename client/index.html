@@ -36,6 +36,7 @@
           <li><a href="#" id="navHome">Home</a></li>
           <li><a href="#" id="navCurrentBooks">Current Books</a></li>
           <li><a href="#" id="navRatings">Ratings</a></li>
+            <li><a href="#" id="navHistory">Book History</a></li>
         </ul>
       </nav>
     </section>  
@@ -58,7 +59,14 @@
     </section>  
     <section id="ratings-section" style="display: none;">
       <h2>Your Book Ratings</h2>
-      <div id="ratingsList" style="display: flex; flex-wrap: wrap; gap: 1rem;"></div>
+        <div
+          id="ratingsList"
+          style="display: flex; flex-wrap: wrap; gap: 1rem"
+        ></div>
+      </section>
+      <section id="history-section" style="display: none">
+        <h2>Your Book History</h2>
+        <div id="historyList"></div>
     </section>    
   </div>
   <script src="main.js"></script>

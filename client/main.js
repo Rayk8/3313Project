@@ -36,6 +36,7 @@ window.addEventListener("DOMContentLoaded", () => {
       document.getElementById("home-section").style.display = "none";
       document.getElementById("current-books-section").style.display = "none";
       document.getElementById("ratings-section").style.display = "block";
+      document.getElementById("history-section").style.display = "none";
     
       fetch(`http://localhost:8080/ratings?username=${username}`)
         .then(res => res.text())
@@ -49,6 +50,7 @@ window.addEventListener("DOMContentLoaded", () => {
       document.getElementById("home-section").style.display = "block";
       document.getElementById("current-books-section").style.display = "none";
       document.getElementById("ratings-section").style.display = "none";
+      document.getElementById("history-section").style.display = "none";
     
       fetch("http://localhost:8080/catalog")
         .then(res => res.text())
@@ -140,9 +142,10 @@ document.getElementById("registerForm").addEventListener("submit", function(even
   // Navbar navigation
   document.getElementById('navHome').addEventListener('click', (e) => {
     e.preventDefault();
-    document.getElementById('home-section').style.display = 'block';
-    document.getElementById('current-books-section').style.display = 'none';
-    document.getElementById('ratings-section').style.display = 'none';
+  document.getElementById("home-section").style.display = "block";
+  document.getElementById("current-books-section").style.display = "none";
+  document.getElementById("ratings-section").style.display = "none";
+  document.getElementById("history-section").style.display = "none";
 
     fetch("http://localhost:8080/catalog")
     .then(res => res.text())
@@ -162,10 +165,11 @@ document.getElementById("registerForm").addEventListener("submit", function(even
       .then(res => res.text())
       .then(html => {
         console.log("CurrentBooks HTML:", html);  
-        document.getElementById('checkedOutList').innerHTML = html;
-        document.getElementById('home-section').style.display = 'none';
-        document.getElementById('current-books-section').style.display = 'block';
-        document.getElementById('ratings-section').style.display = 'none';
+      document.getElementById("checkedOutList").innerHTML = html;
+      document.getElementById("home-section").style.display = "none";
+      document.getElementById("current-books-section").style.display = "block";
+      document.getElementById("ratings-section").style.display = "none";
+      document.getElementById("history-section").style.display = "none";
       })
       .catch(error => {
         console.error("Failed to fetch current books from nav:", error);
@@ -282,6 +286,7 @@ document.getElementById("registerForm").addEventListener("submit", function(even
     document.getElementById("home-section").style.display = "none";
     document.getElementById("current-books-section").style.display = "none";
     document.getElementById("ratings-section").style.display = "none";
+  document.getElementById("history-section").style.display = "none";
 
     fetch(`http://localhost:8080/ratings?username=${username}`)
       .then(res => res.text())
@@ -295,5 +300,24 @@ document.getElementById("registerForm").addEventListener("submit", function(even
       });
   });
   
-  
+document.getElementById("navHistory").addEventListener("click", (e) => {
+  e.preventDefault();
+  const username = localStorage.getItem("username");
+
+  document.getElementById("home-section").style.display = "none";
+  document.getElementById("current-books-section").style.display = "none";
+  document.getElementById("ratings-section").style.display = "none";
+  document.getElementById("history-section").style.display = "none";
+
+  fetch(`http://localhost:8080/history?username=${username}`)
+    .then((res) => res.text())
+    .then((html) => {
+      document.getElementById("historyList").innerHTML = html;
+      document.getElementById("history-section").style.display = "block";
+    })
+    .catch((err) => {
+      console.error("Failed to load history:", err);
+      alert("Could not load book history.");
+    });
+});
   
