@@ -1,9 +1,23 @@
 FROM gcc:latest
 WORKDIR /app
-COPY . .
-RUN apt-get update && apt-get install -y make
-RUN g++ -std=c++17 -Wall -pthread -Iinclude \
-    src/main.cpp src/server.cpp src/library.cpp src/auth.cpp \
-    -o library_server
-EXPOSE 8080
+
+# Copy all necessary files
+COPY src/ ./src/
+COPY include/ ./include/
+COPY *.json ./
+COPY Makefile .
+
+# Install dependencies and build
+RUN apt-get update && \
+    apt-get install -y make && \
+    make clean && \
+    make all
+
+# Set environment variables
+ENV PORT=8080
+
+# Expose the port
+EXPOSE ${PORT}
+
+# Run the server
 CMD ["./library_server"]
